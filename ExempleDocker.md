@@ -29,7 +29,7 @@ Ce document explique comment utiliser Docker Compose pour déployer l'applicatio
 
 2. Démarrez le conteneur avec Docker Compose :
    ```sh
-   docker-compose up -d
+   docker compose up -d
    ```
 3. L'application sera accessible via `http://localhost`.
 

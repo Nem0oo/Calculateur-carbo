@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="apple-touch-icon" href="/icon.png"/>
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculateur Carbo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+
+        .form-container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .form-container h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            margin: 15px 0;
+        }
+
+        input[type="range"]::-webkit-slider-runnable-track {
+            height: 8px;
+            background: #ddd;
+            border-radius: 4px;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 20px;
+            width: 20px;
+            background: #007BFF;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .output {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h1>Calculateur Carbo</h1>
+        <form id="carboForm">
+            <label for="beerType">Type de bière</label>
+            <select id="beerType" required>
+                <option value="1.5,2.0">Ale Anglaise (1.5 - 2.0)</option>
+                <option value="1.7,2.3">Porter, Stout (1.7 - 2.3)</option>
+                <option value="1.9,2.4">Ale Belge (1.9 - 2.4)</option>
+                <option value="2.2,2.7">Lager Européenne (2.2 - 2.7)</option>
+                <option value="2.2,2.7">Ale et Lager Américaines (2.2 - 2.7)</option>
+                <option value="2.4,2.8">Lambic (2.4 - 2.8)</option>
+                <option value="3.0,4.5">Lambic Fruitée (3.0 - 4.5)</option>
+                <option value="3.3,4.5">Bière de Froment (3.3 - 4.5)</option>
+            </select>
+
+            <label for="desiredCarbo">Carbo désirée</label>
+            <input type="range" id="desiredCarbo" step="0.1">
+            <output id="carboOutput"></output>
+
+            <label for="temperature">Température (°C)</label>
+            <input type="number" id="temperature" inputmode="decimal" required>
+
+            <label for="exchangeSurface">Surface d'échange (m²)</label>
+            <input type="number" step="0.01" id="exchangeSurface" inputmode="decimal" required>
+
+            <label for="initialTension">Tension initiale (bar)</label>
+            <input type="number" step="0.1" id="initialTension" value="0" inputmode="decimal" required>
+
+            <label for="volume">Volume (litres)</label>
+            <input type="number" step="0.01" id="volume" inputmode="decimal" required>
+			
+			<label for="kegPressure">Pression dans le fût (bar)</label>
+            <input type="number" step="0.1" id="kegPressure" value="0" inputmode="decimal" required>
+
+            <button type="button" onclick="calculateCarbo()">Calculer</button>
+        </form>
+        <div class="output" id="result"></div>
+    </div>
+
+    <script>
+        const beerTypeSelect = document.getElementById('beerType');
+        const desiredCarboRange = document.getElementById('desiredCarbo');
+        const carboOutput = document.getElementById('carboOutput');
+
+        // Update range limits based on beer type
+        beerTypeSelect.addEventListener('change', () => {
+            const [min, max] = beerTypeSelect.value.split(',').map(Number);
+            desiredCarboRange.min = min;
+            desiredCarboRange.max = max;
+            desiredCarboRange.value = min;
+            carboOutput.textContent = min.toFixed(1);
+        });
+
+        // Update displayed value for desired carbonation
+        desiredCarboRange.addEventListener('input', () => {
+            carboOutput.textContent = desiredCarboRange.value;
+        });
+
+        function calculateCarbo() {
+            const temperature = parseInt(document.getElementById('temperature').value, 10);
+            let kegPressure = parseFloat(document.getElementById('kegPressure').value);
+            const exchangeSurface = parseFloat(document.getElementById('exchangeSurface').value);
+            const initialTension = parseFloat(document.getElementById('initialTension').value);
+            const volume = parseFloat(document.getElementById('volume').value);
+            const desiredCarbo = parseFloat(desiredCarboRange.value);
+
+            // Convert temperature to Fahrenheit
+            const temperatureF = (temperature * 9/5) + 32;
+
+            // Calculate equilibrium pressure in PSI
+            const equilibriumPressurePsi = -16.6999 
+                - 0.010159 * temperatureF
+                + 0.00116512 * temperatureF * temperatureF
+                + 0.173354 * temperatureF * desiredCarbo
+                + 4.24267 * desiredCarbo
+                - 0.0684226 * desiredCarbo * desiredCarbo;
+
+            // Convert PSI to bar (1 PSI = 0.0689476 bar)
+            const equilibriumPressureBar = equilibriumPressurePsi * 0.0689476;
+			if(kegPressure == 0){
+				document.getElementById('kegPressure').value = equilibriumPressureBar.toFixed(2);
+			}
+			kegPressure = parseFloat(document.getElementById('kegPressure').value);
+
+            // Calculate additional variables
+            const kH = (0.000005 * temperature * temperature - 0.0004 * temperature) + 0.0134;
+            const kZero = 0.264321;
+            const h = volume / 1000 / exchangeSurface;
+            const k = (kH * kZero) / h;
+
+            // Calculate carbonation duration
+            let carbonationDuration = NaN;
+
+            if (kegPressure > initialTension && equilibriumPressureBar > initialTension) {
+                carbonationDuration = -Math.log(1 - (equilibriumPressureBar - initialTension) / (kegPressure - initialTension)) / k;
+            }
+
+document.getElementById('result').textContent = `
+    Pression d'équilibre: ${equilibriumPressureBar.toFixed(2)} bar\n
+    Coefficient k: ${k.toFixed(4)}\n
+    Durée de carbonatation: ${isNaN(carbonationDuration) ? 'Valeurs invalides' : `${carbonationDuration.toFixed(2)} heures`}
+`;
+
+            // Display result
+            document.getElementById('result').textContent = `Pression d'équilibre: ${equilibriumPressureBar.toFixed(2)} bar\n\nDurée de carbonatation: ${carbonationDuration.toFixed(2)} heures`;
+        }
+
+        // Initialize default values
+        beerTypeSelect.dispatchEvent(new Event('change'));
+    </script>
+</body>
+</html>

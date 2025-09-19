@@ -39,7 +39,7 @@ jobs:
       - name: Add SSH key
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATEKEY_HUGO }}" > ~/.ssh/id_ed25519
+          echo "${{ secrets.SSH_PRIVATEKEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan gcourtot.fr >> ~/.ssh/known_hosts
         shell: bash

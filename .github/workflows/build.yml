@@ -41,9 +41,9 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATEKEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan gcourtot.fr >> ~/.ssh/known_hosts
+          ssh-keyscan ${{ secrets.URL_SERVER }} >> ~/.ssh/known_hosts
         shell: bash
 
       - name: Deploy via SSH
         run: |
-          ssh -i ~/.ssh/id_ed25519 nem0oo@gcourtot.fr './srv/carbo/update-carbo.sh'
+          ssh -i ~/.ssh/id_ed25519 ${{ secrets.SERVER_USERNAME }}@${{ secrets.URL_SERVER }} './srv/carbo/update-carbo.sh'

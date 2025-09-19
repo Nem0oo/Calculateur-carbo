@@ -46,4 +46,4 @@ jobs:
 
       - name: Deploy via SSH
         run: |
-          ssh -i ~/.ssh/id_ed25519 nem0oo@gcourtot.fr './srv/blog/update-carbo.sh'
+          ssh -i ~/.ssh/id_ed25519 nem0oo@gcourtot.fr './srv/carbo/update-carbo.sh'
